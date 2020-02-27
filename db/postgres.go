@@ -198,6 +198,10 @@ func (db Postgresrepo) Search(search string) (map[int]schema.Contact, error) {
 union select id, firstname, lastname from Contacts where upper(lastname)  like upper(concat('%',$1, '%'))
 `
 	rows, err := db.Db.Query(sqlStr, search, search)
+	if err != nil {
+		logger.Error("Can't select rows", err)
+		return nil, err
+	}
 	for rows.Next() {
 		contact := &schema.Contact{}
 		err = rows.Scan(&contact.Id, &contact.FirstName, &contact.LastName)

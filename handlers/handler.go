@@ -53,7 +53,7 @@ func (h *Handler) AddForm(c *gin.Context) {
 func (h *Handler) Add(c *gin.Context) {
 	// в целям упрощения примера пропущена валидация
 	//err := 	db.AddContact(r.FormValue("firstname"),	r.FormValue("lastname"))
-	err := 	db.AddContact(c.Param("firstname"),	c.Param("lastname"))
+	err := 	db.AddContact(c.PostForm("firstname"),	c.PostForm("lastname"))
 	if err != nil {
 		util.ResponseError(c.Writer,500,"Can't add contact")
 	}
@@ -152,9 +152,10 @@ func (h *Handler) Delete(c *gin.Context) {
 
 
 func (h *Handler) Search(c *gin.Context) {
-	field :=c.Param("field")
 
-	contacts, err := db.Search(field)
+	vars :=c.Request.URL.Query()
+
+	contacts, err := db.Search(vars.Get("search"))
 
 	c.HTML(200, "index.html", contacts)
 	if err != nil {

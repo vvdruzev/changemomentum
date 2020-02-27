@@ -7,6 +7,7 @@ import (
 	"github.com/heroku/changemomentum/handlers"
 	"github.com/heroku/changemomentum/logger"
 	"log"
+	"net/http"
 	"os"
 )
 
@@ -24,9 +25,46 @@ func setupRouter() *gin.Engine {
 	router.GET("/contacts", handler.List)
 	router.GET("/contacts/new", handler.AddForm)
 	router.POST("/contacts/new", handler.Add)
-	router.GET("/contacts/{id}", handler.AddFormPhone)
-	router.POST("/contacts/{id}", handler.AddPhone)
+	router.GET("/contacts/addphone/:id", handler.AddFormPhone)
+	router.POST("/contacts/addphone/:id", handler.AddPhone)
+	router.GET("/contacts/edit/:id", handler.Edit)
+	router.POST("/contacts/update/:id", handler.Update)
+	router.DELETE("/contacts/delete/:id", handler.Delete)
+
+
 	router.GET("/search", handler.Search)
+
+
+	router.GET("/participants", func(c *gin.Context) {
+		c.HTML(http.StatusOK, "index.tmpl.html", nil)
+	})
+
+	router.GET("/participants/new", func(c *gin.Context) {
+		//TODO add
+	})
+	router.POST("/participants/new", func(c *gin.Context) {
+		// TODO addFORM
+	})
+
+	router.GET("/participants/{id}/move", func(c *gin.Context) {
+		//TODO move
+	})
+
+	router.GET("/participants/{id}", func(c *gin.Context) {
+		//TODO EDIT
+	})
+	router.POST("/participants/{id}", func(c *gin.Context) {
+		//TODO Update
+	})
+	router.DELETE("/participants/{id}", func(c *gin.Context) {
+		//TODO Delete
+	})
+
+
+
+
+
+
 
 	return router
 }

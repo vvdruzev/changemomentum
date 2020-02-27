@@ -50,7 +50,7 @@
             <tr>
                 <th scope="row">{{$value.Id}}</th>
                 <td>{{$value.FirstName}} &nbsp;{{$value.LastName}}
-                    <a class="btn btn-primary" href="/contacts/addphone/{{.Id}}"
+                    <a class="btn btn-primary" href="/contacts/{{.Id}}/addphone"
                             style="text-align: left; float: right; border-style: solid;">AddPhone </a>
 
                 </td>
@@ -60,7 +60,7 @@
                 {{end}}
                 </td>
                 <td style="max-width: 170px; width: 171px;">
-                    <a href="/contacts/edit/{{.Id}}" class="btn btn-primary">Edit</a>
+                    <a href="/contacts/{{.Id}}" class="btn btn-primary">Edit</a>
                     <span data-id="{{.Id}}" class="do-delete btn btn-danger">Del</span>
                 </td>
             </tr>
@@ -78,7 +78,7 @@
         }
         $elem = $(this)
         $.ajax({
-            url: '/contacts/delete/' + $elem.data("id"),
+            url: '/contacts/' + $elem.data("id"),
             type: 'DELETE',
             data: {},
             success: function (resp) {
