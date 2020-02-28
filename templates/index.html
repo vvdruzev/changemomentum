@@ -39,6 +39,46 @@
             <thead>
             <tr>
                 <th>#</th>
+                <th>ФИО</th>
+                <th>Команда</th>
+                <th>Дата регистрации</th>
+                <th>кто зарегистрировал</th>
+            </tr>
+            </thead>
+            <tbody>
+            {{ $Participants := . }}
+            {{range $Participants }}
+            <tr>
+                <th scope="row">{{.Id}}</th>
+                <td>{{.FirstName}} &nbsp;{{.LastName}}
+
+                </td>
+                <td>
+                    {{.Command}}
+                </td>
+                <td>
+                    {{.Date}}
+                </td>
+                <td>
+                    {{.Usertokenid}}
+                </td>
+
+                <td style="max-width: 170px; width: 171px;">
+                    <a href="/participants/edit/{{.Id}}" class="btn btn-primary">Edit</a>
+                    <span data-id="{{.Id}}" class="do-delete btn btn-danger">Del</span>
+                </td>
+            </tr>
+            {{end}}
+            </tbody>
+        </table>
+    </div>
+
+    <div class="m-5">
+
+        <table class="table" style="">
+            <thead>
+            <tr>
+                <th>#</th>
                 <th>Name</th>
                 <th>Phone</th>
                 <th>Action</th>
@@ -47,23 +87,23 @@
             <tbody>
             {{ $Contacts := . }}
             {{range $key, $value := $Contacts }}
-            <tr>
-                <th scope="row">{{$value.Id}}</th>
-                <td>{{$value.FirstName}} &nbsp;{{$value.LastName}}
-                    <a class="btn btn-primary" href="/contacts/addphone/{{.Id}}"
-                            style="text-align: left; float: right; border-style: solid;">AddPhone </a>
+                <tr>
+                    <th scope="row">{{$value.Id}}</th>
+                    <td>{{$value.FirstName}} &nbsp;{{$value.LastName}}
+                        <a class="btn btn-primary" href="/contacts/addphone/{{.Id}}"
+                           style="text-align: left; float: right; border-style: solid;">AddPhone </a>
 
-                </td>
-                <td>
-                {{ range $value.Phones}}
-                    <li><b>{{ . }}</b></li>
-                {{end}}
-                </td>
-                <td style="max-width: 170px; width: 171px;">
-                    <a href="/contacts/edit/{{.Id}}" class="btn btn-primary">Edit</a>
-                    <span data-id="{{.Id}}" class="do-delete btn btn-danger">Del</span>
-                </td>
-            </tr>
+                    </td>
+                    <td>
+                        {{ range $value.Phones}}
+                            <li><b>{{ . }}</b></li>
+                        {{end}}
+                    </td>
+                    <td style="max-width: 170px; width: 171px;">
+                        <a href="/contacts/edit/{{.Id}}" class="btn btn-primary">Edit</a>
+                        <span data-id="{{.Id}}" class="do-delete btn btn-danger">Del</span>
+                    </td>
+                </tr>
             {{end}}
             </tbody>
         </table>
@@ -88,6 +128,32 @@
             },
         });
     })
+</script>
+
+
+
+<script type="text/javascript">
+    document.addEventListener('DOMContentLoaded', () => {
+
+        const getSort = ({ target }) => {
+            const order = (target.dataset.order = -(target.dataset.order || -1));
+            const index = [...target.parentNode.cells].indexOf(target);
+            const collator = new Intl.Collator(['en', 'ru'], { numeric: true });
+            const comparator = (index, order) => (a, b) => order * collator.compare(
+                a.children[index].innerHTML,
+                b.children[index].innerHTML
+            );
+
+            for(const tBody of target.closest('table').tBodies)
+                tBody.append(...[...tBody.rows].sort(comparator(index, order)));
+
+            for(const cell of target.parentNode.cells)
+                cell.classList.toggle('sorted', cell === target);
+        };
+
+        document.querySelectorAll('.table_sort thead').forEach(tableTH => tableTH.addEventListener('click', () => getSort(event)));
+
+    });
 </script>
 </body>
 </html>

@@ -21,38 +21,18 @@ func NewHandler() *Handler  {
 }
 
 func (h *Handler) List(c *gin.Context) {
-	contacts,_ := db.List()
+	participants,_ := db.List()
 
-	//err = h.Tmpl.ExecuteTemplate(w, "index.html", struct {
-	//	Contacts map[int]schema.Contact
-	//	Phones map[int][]string
-	//	schema.Search
-	//}{
-	//	contacts,
-	//	phones,
-	//	schema.Search{"",},
-	//})
-
-	c.HTML(200,"index.html", contacts)
-	//if err != nil {
-	//	http.Error(w, err.Error(), http.StatusInternalServerError)
-	//	return
-	//}
-
+	c.HTML(200,"index.html", participants)
 }
 
+
 func (h *Handler) AddForm(c *gin.Context) {
-	//err := h.Tmpl.ExecuteTemplate(c.Writer, "create.html", nil)
 	c.HTML(200,"create.html", nil)
-	//if err != nil {
-	//	http.Error(c.Writer, err.Error(), http.StatusInternalServerError)
-	//	return
-	//}
 }
 
 func (h *Handler) Add(c *gin.Context) {
 	// в целям упрощения примера пропущена валидация
-	//err := 	db.AddContact(r.FormValue("firstname"),	r.FormValue("lastname"))
 	err := 	db.AddContact(c.PostForm("firstname"),	c.PostForm("lastname"))
 	if err != nil {
 		util.ResponseError(c.Writer,500,"Can't add contact")
@@ -61,7 +41,6 @@ func (h *Handler) Add(c *gin.Context) {
 }
 
 func (h *Handler) AddFormPhone(c *gin.Context) {
-	//vars := mux.Vars(r)
 	item  := &schema.Phone{}
 
 	id,err := strconv.Atoi(c.Param("id"))
@@ -78,19 +57,18 @@ func (h *Handler) AddFormPhone(c *gin.Context) {
 }
 
 func (h *Handler) AddPhone(c *gin.Context) {
-	//vars := mux.Vars(r)
+	//vars :=c.Request.URL.Query()
 	id,err := strconv.Atoi(c.Param("id"))
 	if err != nil {
 		util.ResponseError(c.Writer,500,"Bad id")
 	}
 
 	// в целям упрощения примера пропущена валидация
-	err = 	db.AddPhone(id,c.Param("PhoneNumber"))
+	err = 	db.AddPhone(id,c.PostForm("PhoneNumber"))
 	if err != nil {
 		util.ResponseError(c.Writer,500,"Error add contact")
 	}
 	c.Redirect(http.StatusFound, "/")
-	//http.Redirect(w, r, "/", http.StatusFound)
 }
 
 func (h *Handler) Edit (c *gin.Context) {
@@ -101,7 +79,6 @@ func (h *Handler) Edit (c *gin.Context) {
 	}
 	contact, err := db.SelectItem(id)
 
-	//err = h.Tmpl.ExecuteTemplate(c.Writer, "edit.html", contact)
 	c.HTML(200,"edit.html", contact )
 	if err != nil {
 		http.Error(c.Writer, err.Error(), http.StatusInternalServerError)
@@ -110,8 +87,6 @@ func (h *Handler) Edit (c *gin.Context) {
 }
 
 func (h *Handler) Update(c *gin.Context) {
-	//vars := mux.Vars(r)
-	//r.ParseForm()
 	fmt.Println(c.Param("phonenumber"))
 	id,err := strconv.Atoi(c.Param("id"))
 	if err != nil {
@@ -119,11 +94,11 @@ func (h *Handler) Update(c *gin.Context) {
 	}
 	var contact schema.Contact
 	contact.Id = id
-	contact.FirstName = c.Param("firstname")
-	contact.LastName  = c.Param("lastname")
+	contact.FirstName = c.PostForm("firstname")
+	contact.LastName  = c.PostForm("lastname")
 	//var phonenumbers map[string][]string
-	phonenumbers := c.GetStringMapStringSlice("phonenumber")
-	err = db.Update(contact,phonenumbers["phonenumber"])
+	phonenumbers := c.PostFormArray("phonenumber")
+	err = db.Update(contact,phonenumbers)
 	if err != nil  {
 		util.ResponseError(c.Writer,404,"Can't update contact")
 	}
@@ -133,8 +108,8 @@ func (h *Handler) Update(c *gin.Context) {
 }
 
 func (h *Handler) Delete(c *gin.Context) {
-	vars := c.PostFormMap("id")
-	id, err := strconv.Atoi(vars["id"])
+	//vars := c.PostFormMap("id")
+	id, err := strconv.Atoi(c.Param("id"))
 	if err != nil {
 		util.ResponseError(c.Writer,500,"Bad id")
 	}
@@ -153,9 +128,9 @@ func (h *Handler) Delete(c *gin.Context) {
 
 func (h *Handler) Search(c *gin.Context) {
 
-	vars :=c.Request.URL.Query()
-
-	contacts, err := db.Search(vars.Get("search"))
+	//vars :=c.Request.URL.Query()
+	a := (c.Query("search"))
+	contacts, err := db.Search(a)
 
 	c.HTML(200, "index.html", contacts)
 	if err != nil {

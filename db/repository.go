@@ -7,7 +7,7 @@ import (
 type Repository interface {
 	Close()
 	AddContact(string, string) error
-	List() (map[int]schema.Contact, error)
+	List() ([]schema.Participant, error)
 	AddPhone (int , string) error
 	SelectItem (int) (schema.Contact, error)
 	Delete (int) error
@@ -26,7 +26,7 @@ func Close() {
 }
 
 
-func List() (map[int]schema.Contact, error)  {
+func List() ([]schema.Participant, error)  {
 	return impl.List()
 }
 

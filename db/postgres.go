@@ -5,7 +5,8 @@ import (
 	"fmt"
 	"github.com/heroku/changemomentum/logger"
 	"github.com/heroku/changemomentum/schema"
-	_ "github.com/lib/pq"
+	"github.com/jmoiron/sqlx"
+	_ "github.com/jackc/pgx"
 )
 
 type Postgresrepo struct {
@@ -13,7 +14,7 @@ type Postgresrepo struct {
 }
 
 func NewPostgresrepo(dsn *string) (*Postgresrepo, error) {
-	db, err := sql.Open("postgres", *dsn)
+	db, err := sqlx.Open("postgres", *dsn)
 	if err != nil {
 		return nil, err
 	}
@@ -87,23 +88,24 @@ func (db Postgresrepo) AddPhone(idContact int, phone string) error {
 	return nil
 }
 
-func (db Postgresrepo) List() (map[int]schema.Contact, error) {
-	contacts := make(map[int]schema.Contact)
-	sqlStr := "select id, firstname, lastname from Contacts"
+func (db Postgresrepo) List() ([]schema.Participant, error) {
+	//participants := make(map[int]schema.Participant)
+	var participants []schema.Participant
+	sqlStr := "select id, firstname, lastname, command, data_registration, usertokenid from participants"
 	rows, err := db.Db.Query(sqlStr)
 	for rows.Next() {
-		contact := &schema.Contact{}
-		err = rows.Scan(&contact.Id, &contact.FirstName, &contact.LastName)
+		participant := &schema.Participant{}
+		err = rows.Scan(&participant.Id, &participant.FirstName, &participant.LastName, &participant.Command, &participant.Date, &participant.UsertokenId)
 		if err != nil {
 			logger.Error("Can't select rows", err)
 			return nil,  err
 		}
-		db.selectItemPhones(contact)
-		contacts[contact.Id] = *contact
+		//db.selectItemUsertoken(participant)
+		participants[participant.Id] = *participant
 	}
 
 	rows.Close()
-	return contacts, nil
+	return participants, nil
 }
 
 func (db Postgresrepo) Delete(id int) error {
@@ -150,11 +152,13 @@ func (db Postgresrepo) Update(contact schema.Contact, phones []string) error {
 	}
 
 	for _, number := range phones {
-		sqlstr2 := "insert into Phonenumber (contact_id, Phonenumber) VALUES ($1,$1)"
-		if _, err = tx.Exec(sqlstr2, contact.Id, number); err != nil {
-			tx.Rollback()
-			logger.Error("Can't insert rows", err)
-			return err
+		if number != "" {
+			sqlstr2 := "insert into Phonenumber (contact_id, Phonenumber) VALUES ($1,$2)"
+			if _, err = tx.Exec(sqlstr2, contact.Id, number); err != nil {
+				tx.Rollback()
+				logger.Error("Can't insert rows", err)
+				return err
+			}
 		}
 	}
 	err = tx.Commit()
@@ -162,18 +166,16 @@ func (db Postgresrepo) Update(contact schema.Contact, phones []string) error {
 	return err
 }
 
-func (db Postgresrepo) selectItemPhones(contact *schema.Contact) error {
-	rowsphone, err := db.Db.Query("select Phonenumber from Phonenumber where contact_id = $1", contact.Id)
-	for rowsphone.Next() {
-		phone := new(string)
-		err = rowsphone.Scan(&phone)
+func (db Postgresrepo) selectItemUsertoken(participant *schema.Participant) error {
+	rows, err := db.Db.Query("select login from UsersToken where id = $1", participant.UsertokenId)
+	usertoken := &schema.UsersToken{}
+	err = rows.Scan(&usertoken.Login)
+
 		if err != nil {
 			logger.Error("Can't select rows", err)
 			return err
 		}
-		contact.Phones = append(contact.Phones, *phone)
-	}
-	rowsphone.Close()
+	rows.Close()
 	return nil
 }
 
@@ -186,7 +188,7 @@ func (db Postgresrepo) SelectItem(id int) (schema.Contact, error) {
 		logger.Error("Can't select rows", err)
 		return schema.Contact{}, err
 	}
-	db.selectItemPhones(contact)
+	//db.selectItemPhones(contact)
 
 	return *contact, nil
 }
@@ -194,9 +196,7 @@ func (db Postgresrepo) SelectItem(id int) (schema.Contact, error) {
 
 func (db Postgresrepo) Search(search string) (map[int]schema.Contact, error) {
 	contacts := make(map[int]schema.Contact)
-	sqlStr := `select id, firstname, lastname from Contacts where upper(firstname) like upper(concat('%',$1, '%'))
-union select id, firstname, lastname from Contacts where upper(lastname)  like upper(concat('%',$1, '%'))
-`
+	sqlStr := "select id, firstname, lastname from Contacts where upper(firstname) like upper('%'||$1||'%') or upper(lastname)  like upper('%'||$2||'%')"
 	rows, err := db.Db.Query(sqlStr, search, search)
 	if err != nil {
 		logger.Error("Can't select rows", err)
@@ -209,12 +209,12 @@ union select id, firstname, lastname from Contacts where upper(lastname)  like u
 			logger.Error("Can't select rows", err)
 			return nil, err
 		}
-		db.selectItemPhones(contact)
+		//db.selectItemPhones(contact)
 		contacts[contact.Id] = *contact
 	}
 	rows.Close()
 
-	rows, err = db.Db.Query("select contact_id from Phonenumber where upper(Phonenumber) like upper(concat('%',$1,'%'))", search)
+	rows, err = db.Db.Query("select contact_id from Phonenumber where upper(Phonenumber) like upper('%'||$1||'%')", search)
 	for rows.Next() {
 		contactId := new(int)
 		err = rows.Scan(&contactId)

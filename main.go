@@ -2,12 +2,10 @@ package main
 
 import (
 	"github.com/gin-gonic/gin"
-	_ "github.com/go-sql-driver/mysql"
 	"github.com/heroku/changemomentum/db"
 	"github.com/heroku/changemomentum/handlers"
 	"github.com/heroku/changemomentum/logger"
 	"log"
-	"net/http"
 	"os"
 )
 
@@ -35,9 +33,7 @@ func setupRouter() *gin.Engine {
 	router.GET("/search", handler.Search)
 
 
-	router.GET("/participants", func(c *gin.Context) {
-		c.HTML(http.StatusOK, "index.tmpl.html", nil)
-	})
+	router.GET("/participants", handler.List)
 
 	router.GET("/participants/new", func(c *gin.Context) {
 		//TODO add
@@ -50,13 +46,13 @@ func setupRouter() *gin.Engine {
 		//TODO move
 	})
 
-	router.GET("/participants/{id}", func(c *gin.Context) {
+	router.GET("/participants/edit/:id", func(c *gin.Context) {
 		//TODO EDIT
 	})
-	router.POST("/participants/{id}", func(c *gin.Context) {
+	router.POST("/participants/update/:id", func(c *gin.Context) {
 		//TODO Update
 	})
-	router.DELETE("/participants/{id}", func(c *gin.Context) {
+	router.DELETE("/participants/delete/:id", func(c *gin.Context) {
 		//TODO Delete
 	})
 
