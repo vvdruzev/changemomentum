@@ -46,8 +46,8 @@
             </tr>
             </thead>
             <tbody>
-            {{ $Participants := . }}
-            {{range $Participants }}
+            {{ $PartRegistred := .PartRegistred }}
+            {{range $PartRegistred }}
             <tr>
                 <th scope="row">{{.Id}}</th>
                 <td>{{.FirstName}} &nbsp;{{.LastName}}
@@ -60,12 +60,13 @@
                     {{.Date}}
                 </td>
                 <td>
-                    {{.Usertokenid}}
+                    {{.UsertokenId}}
                 </td>
 
                 <td style="max-width: 170px; width: 171px;">
                     <a href="/participants/edit/{{.Id}}" class="btn btn-primary">Edit</a>
                     <span data-id="{{.Id}}" class="do-delete btn btn-danger">Del</span>
+                    <span data-id="{{.Id}}" class="do-unregistration btn btn-danger">снять регистрацию</span>
                 </td>
             </tr>
             {{end}}
@@ -74,40 +75,46 @@
     </div>
 
     <div class="m-5">
-
         <table class="table" style="">
             <thead>
             <tr>
                 <th>#</th>
-                <th>Name</th>
-                <th>Phone</th>
-                <th>Action</th>
+                <th>ФИО</th>
+                <th>Команда</th>
+                <th>Дата регистрации</th>
+                <th>кто зарегистрировал</th>
             </tr>
             </thead>
             <tbody>
-            {{ $Contacts := . }}
-            {{range $key, $value := $Contacts }}
+            {{ $PartNotRegistred := .PartNotRegistred }}
+            {{range $PartNotRegistred }}
                 <tr>
-                    <th scope="row">{{$value.Id}}</th>
-                    <td>{{$value.FirstName}} &nbsp;{{$value.LastName}}
-                        <a class="btn btn-primary" href="/contacts/addphone/{{.Id}}"
-                           style="text-align: left; float: right; border-style: solid;">AddPhone </a>
+                    <th scope="row">{{.Id}}</th>
+                    <td>{{.FirstName}} &nbsp;{{.LastName}}
 
                     </td>
                     <td>
-                        {{ range $value.Phones}}
-                            <li><b>{{ . }}</b></li>
-                        {{end}}
+                        {{.Command}}
                     </td>
+                    <td>
+                        {{.Date}}
+                    </td>
+                    <td>
+                        {{.UsertokenId}}
+                    </td>
+
                     <td style="max-width: 170px; width: 171px;">
-                        <a href="/contacts/edit/{{.Id}}" class="btn btn-primary">Edit</a>
+                        <a href="/participants/edit/{{.Id}}" class="btn btn-primary">Edit</a>
                         <span data-id="{{.Id}}" class="do-delete btn btn-danger">Del</span>
+                        <span data-id="{{.Id}}" class="do-registration btn btn-danger">зарегистрировать</span>
                     </td>
                 </tr>
             {{end}}
             </tbody>
         </table>
     </div>
+
+
 </div>
 <script src="https://code.jquery.com/jquery-3.2.1.min.js" crossorigin="anonymous"></script>
 
@@ -118,7 +125,7 @@
         }
         $elem = $(this)
         $.ajax({
-            url: '/contacts/delete/' + $elem.data("id"),
+            url: '/participants/delete/' + $elem.data("id"),
             type: 'DELETE',
             data: {},
             success: function (resp) {
@@ -129,6 +136,43 @@
         });
     })
 </script>
+
+<script type="text/javascript">
+    $('.do-registration').click(function () {
+        if (!confirm("Are you sure?")) {
+            return
+        }
+        $elem = $(this)
+        $.ajax({
+            url: '/participants/registration/' + $elem.data("id"),
+            type: 'POST',
+            data: {},
+            success: function (resp) {
+                if (resp.affected > 0) {
+                    $("#results").append(resp)
+                }
+            },
+        });
+    })
+</script>
+
+<script type="text/javascript">
+    $('.do-unregistration').click(function () {
+        if (!confirm("Are you sure?")) {
+            return
+        }
+        $elem = $(this)
+        $.ajax({
+            url: '/participants/unregistration/' + $elem.data("id"),
+            type: 'POST',
+            data: {},
+            success: function(html){
+                $("#container").html(html);
+            }
+        });
+    })
+</script>
+
 
 
 

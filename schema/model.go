@@ -1,7 +1,5 @@
 package schema
 
-import "time"
-
 type Contact struct {
 	Id        int
 	FirstName string
@@ -19,7 +17,7 @@ type Participant struct {
 	FirstName string
 	LastName  string
 	Command string
-	Date	time.Time
+	Date	string
 	UsertokenId int
 }
 

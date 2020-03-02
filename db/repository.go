@@ -6,13 +6,16 @@ import (
 
 type Repository interface {
 	Close()
-	AddContact(string, string) error
+	AddParticipant(string, string, string, int) error
 	List() ([]schema.Participant, error)
 	AddPhone (int , string) error
-	SelectItem (int) (schema.Contact, error)
+	SelectItem (int) (schema.Participant, error)
 	Delete (int) error
-	Update (schema.Contact,[]string)  error
-	Search(string) (map[int]schema.Contact,  error)
+	Update (schema.Participant)  error
+	Search(string) ([]schema.Participant,  error)
+	Registration (int) error
+	UnRegistration (int) error
+
 }
 
 var impl Repository
@@ -30,15 +33,15 @@ func List() ([]schema.Participant, error)  {
 	return impl.List()
 }
 
-func AddContact(firstname string, lastname string) error  {
-	return impl.AddContact(firstname,lastname)
+func AddContact(firstname string, lastname string, command string,id int) error  {
+	return impl.AddParticipant(firstname,lastname, command, id)
 }
 
 func AddPhone(id int, number string) error  {
 	return impl.AddPhone(id,number)
 }
 
-func SelectItem( id int) (schema.Contact,  error)  {
+func SelectItem( id int) (schema.Participant,  error)  {
 	return impl.SelectItem(id)
 }
 
@@ -46,10 +49,18 @@ func Delete(id int) error {
 	return impl.Delete(id)
 }
 
-func Update(contact schema.Contact,phones []string) error  {
-	return impl.Update(contact,phones)
+func Update(participant schema.Participant) error  {
+	return impl.Update(participant)
 }
 
-func Search(search string) (map[int]schema.Contact, error)  {
+func Search(search string) ([]schema.Participant, error)  {
 	return impl.Search(search)
+}
+
+func Registration(id int) (error)  {
+	return impl.Registration(id)
+}
+
+func UnRegistration(id int) (error)  {
+	return impl.UnRegistration(id)
 }

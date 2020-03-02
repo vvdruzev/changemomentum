@@ -35,27 +35,20 @@ func setupRouter() *gin.Engine {
 
 	router.GET("/participants", handler.List)
 
-	router.GET("/participants/new", func(c *gin.Context) {
-		//TODO add
-	})
-	router.POST("/participants/new", func(c *gin.Context) {
-		// TODO addFORM
-	})
+	router.GET("/participants/new", handler.AddForm)
+	router.POST("/participants/new", handler.Add)
 
 	router.GET("/participants/{id}/move", func(c *gin.Context) {
 		//TODO move
 	})
 
-	router.GET("/participants/edit/:id", func(c *gin.Context) {
-		//TODO EDIT
-	})
-	router.POST("/participants/update/:id", func(c *gin.Context) {
-		//TODO Update
-	})
-	router.DELETE("/participants/delete/:id", func(c *gin.Context) {
-		//TODO Delete
-	})
+	router.GET("/participants/edit/:id", handler.Edit)
+	router.POST("/participants/update/:id", handler.Update)
+	router.DELETE("/participants/delete/:id", handler.Delete)
 
+	router.POST("/participants/registration/:id", handler.Registration)
+
+	router.POST("/participants/unregistration/:id", handler.UnRegistration)
 
 
 
